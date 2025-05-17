@@ -1,20 +1,7 @@
 import React from "react";
 
-function validateInput(key, input) {
-  switch (key) {
-    case "birthdate": return /^\d{4}-\d{2}-\d{2}$/.test(input);
-    case "name":
-    case "address":
-    case "address2": return input.trim().length > 0;
-    case "postalCode": return /^\d{7}$/.test(input);
-    case "phone": return /^\d{10,11}$/.test(input);
-    case "email": return /\S+@\S+\.\S+/.test(input);
-    default: return true;
-  }
-}
 
 const ChatMessage = ({
-  questionObj,
   question,
   type = "text",
   options = [],
@@ -51,6 +38,25 @@ const ChatMessage = ({
               onKeyDown={handleKeyDown}
             />
           )}
+                    {type === "nameSplit" && (
+                      <div className="flex space-x-2 mb-2">
+                        <input
+                          type="text"
+                          placeholder="山田"
+                          className="w-1/2 border border-gray-300 p-2 rounded"
+                          value={value?.lastName || ""}
+                          onChange={(e) => onChange?.({ ...value, lastName: e.target.value })}
+                        />
+                        <input
+                          type="text"
+                          placeholder="花子"
+                          className="w-1/2 border border-gray-300 p-2 rounded"
+                          value={value?.firstName || ""}
+                          onChange={(e) => onChange?.({ ...value, firstName: e.target.value })}
+                        />
+                      </div>
+                    )}
+
           {type === "date" && (
             <input
               type="date"

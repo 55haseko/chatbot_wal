@@ -25,6 +25,11 @@ function validateInput(key, input) {
   switch (key) {
     case "birthdate": return /^\d{4}-\d{2}-\d{2}$/.test(input);
     case "name":
+      return (
+        typeof input === "object" &&
+        input?.lastName?.trim().length > 0 &&
+        input?.firstName?.trim().length > 0
+      );
     case "address":
     case "address2": return input.trim().length > 0;
     case "postalCode": return /^\d{7}$/.test(input);
@@ -54,7 +59,7 @@ const ChatWindow = () => {
       type: "info",
       text: "お名前（氏名）を入力してください。",
     },
-    { id: "name", type: "text" },
+    { id: "name", type: "nameSplit" },
   
     {
       id: "info_birthdate",
