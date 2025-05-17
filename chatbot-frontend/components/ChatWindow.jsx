@@ -23,7 +23,14 @@ const USE_MOCK = false;
 
 function validateInput(key, input) {
   switch (key) {
-    case "birthdate": return /^\d{4}-\d{2}-\d{2}$/.test(input);
+    case "birthdate":
+      return (
+        typeof input === "object" &&
+        input?.year &&
+        input?.month &&
+        input?.day
+      );
+
     case "name":
       return (
         typeof input === "object" &&
@@ -66,7 +73,8 @@ const ChatWindow = () => {
       type: "info",
       text: "生年月日を入力してください。\n（例：1990-01-01）",
     },
-    { id: "birthdate", type: "date" },
+    { id: "birthdate", type: "birthdateSelect" },
+
   
     {
       id: "info_gender",

@@ -12,13 +12,17 @@ const CheckoutForm = ({ answers, onSuccess }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: answers.name,
+          name: answers.name?.lastName + " " + answers.name?.firstName,
           email: answers.email,
           phone: answers.phone,
           address: `${answers.address} ${answers.address2}`,
+          birthdate: answers.birthdate?.year && answers.birthdate?.month && answers.birthdate?.day
+            ? `${answers.birthdate.year}-${String(answers.birthdate.month).padStart(2, "0")}-${String(answers.birthdate.day).padStart(2, "0")}`
+            : "",
           amount: 5000,
           payment_method: "stripe",
         }),
+        
       });
       const { order_id } = await orderRes.json();
 

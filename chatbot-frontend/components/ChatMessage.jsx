@@ -57,18 +57,46 @@ const ChatMessage = ({
                       </div>
                     )}
 
-          {type === "date" && (
-            <input
-              type="date"
-              pattern="\\d{4}-\\d{2}-\\d{2}"
-              min="1900-01-01"
-              max="2099-12-31"
-              className="w-full p-2 border border-gray-300 rounded mb-2"
-              value={value}
-              onChange={(e) => onChange?.(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
+         
+          {type === "birthdateSelect" && (
+            <div className="flex space-x-2 mb-2">
+              <select
+                className="border p-2 rounded"
+                value={value?.year || ""}
+                onChange={(e) => onChange?.({ ...value, year: e.target.value })}
+              >
+                <option value="">年</option>
+                {Array.from({ length: 120 }, (_, i) => 1905 + i)
+                  .reverse()
+                  .map((y) => (
+                    <option key={y} value={y}>{y}年</option>
+                  ))}
+              </select>
+
+              <select
+                className="border p-2 rounded"
+                value={value?.month || ""}
+                onChange={(e) => onChange?.({ ...value, month: e.target.value })}
+              >
+                <option value="">月</option>
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                  <option key={m} value={m}>{m}月</option>
+                ))}
+              </select>
+
+              <select
+                className="border p-2 rounded"
+                value={value?.day || ""}
+                onChange={(e) => onChange?.({ ...value, day: e.target.value })}
+              >
+                <option value="">日</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                  <option key={d} value={d}>{d}日</option>
+                ))}
+              </select>
+            </div>
           )}
+
           {type === "select" && options.length > 0 && (
             <div className="flex space-x-4 mb-2">
               {options.map((opt) => (
