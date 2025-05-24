@@ -71,7 +71,7 @@ const ChatWindow = () => {
     {
       id: "info_birthdate",
       type: "info",
-      text: "生年月日を入力してください。\n（例：1990-01-01）",
+      text: "生年月日を入力してください。",
     },
     { id: "birthdate", type: "birthdateSelect" },
 

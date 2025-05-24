@@ -58,44 +58,60 @@ const ChatMessage = ({
                     )}
 
          
-          {type === "birthdateSelect" && (
-            <div className="flex space-x-2 mb-2">
-              <select
-                className="border p-2 rounded"
-                value={value?.year || ""}
-                onChange={(e) => onChange?.({ ...value, year: e.target.value })}
-              >
-                <option value="">年</option>
-                {Array.from({ length: 120 }, (_, i) => 1905 + i)
-                  .reverse()
-                  .map((y) => (
-                    <option key={y} value={y}>{y}年</option>
-                  ))}
-              </select>
+{type === "birthdateSelect" && (
+  <div className="flex flex-col items-center space-y-3 mb-4">
+ 
+    <div className="flex items-center justify-center space-x-6 text-lg">
+      {/* 年 */}
+      <div className="flex items-center space-x-1">
+        <span className="text-gray-800">年</span>
+        <select
+          className="border rounded px-4 py-2 text-lg"
+          value={value?.year || ""}
+          onChange={(e) => onChange?.({ ...value, year: e.target.value })}
+        >
+          <option value="">--</option>
+          {Array.from({ length: 120 }, (_, i) => 1905 + i)
+            .reverse()
+            .map((y) => (
+              <option key={y} value={y}>{y}年</option>
+            ))}
+        </select>
+      </div>
 
-              <select
-                className="border p-2 rounded"
-                value={value?.month || ""}
-                onChange={(e) => onChange?.({ ...value, month: e.target.value })}
-              >
-                <option value="">月</option>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option key={m} value={m}>{m}月</option>
-                ))}
-              </select>
+      {/* 月 */}
+      <div className="flex items-center space-x-1">
+        <span className="text-gray-800">月</span>
+        <select
+          className="border rounded px-4 py-2 text-lg"
+          value={value?.month || ""}
+          onChange={(e) => onChange?.({ ...value, month: e.target.value })}
+        >
+          <option value="">--</option>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+            <option key={m} value={m}>{m}月</option>
+          ))}
+        </select>
+      </div>
 
-              <select
-                className="border p-2 rounded"
-                value={value?.day || ""}
-                onChange={(e) => onChange?.({ ...value, day: e.target.value })}
-              >
-                <option value="">日</option>
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                  <option key={d} value={d}>{d}日</option>
-                ))}
-              </select>
-            </div>
-          )}
+      {/* 日 */}
+      <div className="flex items-center space-x-1">
+        <span className="text-gray-800">日</span>
+        <select
+          className="border rounded px-4 py-2 text-lg"
+          value={value?.day || ""}
+          onChange={(e) => onChange?.({ ...value, day: e.target.value })}
+        >
+          <option value="">--</option>
+          {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+            <option key={d} value={d}>{d}日</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </div>
+)}
+
 
           {type === "select" && options.length > 0 && (
             <div className="flex space-x-4 mb-2">
