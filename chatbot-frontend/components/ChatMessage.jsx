@@ -66,17 +66,24 @@ const ChatMessage = ({
       <div className="flex items-center space-x-1">
         <span className="text-gray-800">年</span>
         <select
-          className="border rounded px-4 py-2 text-lg"
-          value={value?.year || ""}
-          onChange={(e) => onChange?.({ ...value, year: e.target.value })}
-        >
-          <option value="">--</option>
-          {Array.from({ length: 120 }, (_, i) => 1905 + i)
-            .reverse()
-            .map((y) => (
-              <option key={y} value={y}>{y}年</option>
-            ))}
-        </select>
+            className="border rounded px-4 py-2 text-lg"
+            value={value?.year || ""} // デフォルト値は -- の value("") を指定
+            onChange={(e) => onChange?.({ ...value, year: e.target.value })}
+          >
+            {Array.from({ length: 120 }, (_, i) => 1905 + i)
+              .reverse()
+              .flatMap((y) => {
+                if (y === 1991) {
+                  return [
+                    <option key={y} value={y}>{y}年</option>,
+                    <option key="empty" value="">--</option>, // ← 「--」は空文字 value にして間に挿入
+                  ];
+                } else {
+                  return <option key={y} value={y}>{y}年</option>;
+                }
+              })}
+          </select>
+
       </div>
 
       {/* 月 */}
