@@ -5,6 +5,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false); // ⭐️ 処理中フラグ追加
 
   useEffect(() => {
     const createOrderAndIntent = async () => {
@@ -16,13 +17,13 @@ const CheckoutForm = ({ answers, onSuccess }) => {
           email: answers.email,
           phone: answers.phone,
           address: `${answers.address} ${answers.address2}`,
-          birthdate: answers.birthdate?.year && answers.birthdate?.month && answers.birthdate?.day
-            ? `${answers.birthdate.year}-${String(answers.birthdate.month).padStart(2, "0")}-${String(answers.birthdate.day).padStart(2, "0")}`
-            : "",
+          birthdate:
+            answers.birthdate?.year && answers.birthdate?.month && answers.birthdate?.day
+              ? `${answers.birthdate.year}-${String(answers.birthdate.month).padStart(2, "0")}-${String(answers.birthdate.day).padStart(2, "0")}`
+              : "",
           amount: 5000,
           payment_method: "stripe",
         }),
-        
       });
       const { order_id } = await orderRes.json();
 
@@ -41,16 +42,23 @@ const CheckoutForm = ({ answers, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      // 🔍 ここで answers の中身を確認
-  console.log("🔍 answers:", answers);
-  console.log("🔍 postalCode:", answers.postalCode);
+
+    if (isProcessing) {
+      // すでに送信中なら処理をしない
+      return;
+    }
+    setIsProcessing(true); // ⭐️ 送信開始時にtrueにする
+
+    console.log("🔍 answers:", answers);
+    console.log("🔍 postalCode:", answers.postalCode);
+
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
         card: elements.getElement(CardElement),
         billing_details: {
           email: answers.email,
           address: {
-            postal_code: answers.postalCode, // ← ここがポイント
+            postal_code: answers.postalCode,
           },
         },
       },
@@ -58,6 +66,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
 
     if (result.error) {
       alert("決済エラー：" + result.error.message);
+      setIsProcessing(false); // ⭐️ エラー時に再送信可能に
     } else {
       const order_id = localStorage.getItem("order_id");
       await fetch(`http://localhost:8000/order/complete/${order_id}`, {
@@ -65,6 +74,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
       });
       alert("決済成功しました！");
       onSuccess();
+      // ⭐️ 正常終了後は再度送信を許可しなくてOK。フォームが消える想定？
     }
   };
 
@@ -72,25 +82,23 @@ const CheckoutForm = ({ answers, onSuccess }) => {
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded bg-white">
       <CardElement
         options={{
-          hidePostalCode: true, // ← UIからは非表示
+          hidePostalCode: true,
           style: {
             base: {
               fontSize: "16px",
               color: "#32325d",
               "::placeholder": { color: "#a0aec0" },
             },
-            invalid: {
-              color: "#fa755a",
-            },
+            invalid: { color: "#fa755a" },
           },
         }}
       />
       <button
         type="submit"
-        disabled={!stripe || !clientSecret}
-        className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+        disabled={!stripe || !clientSecret || isProcessing} // ⭐️ ここでisProcessingも考慮
+        className={`bg-blue-600 text-white px-4 py-2 rounded w-full ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
       >
-        カードで支払う
+        {isProcessing ? "処理中..." : "カードで支払う"}
       </button>
     </form>
   );
