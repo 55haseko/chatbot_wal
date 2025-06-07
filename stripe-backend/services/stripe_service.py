@@ -19,6 +19,7 @@ def create_payment_intent(amount: int, currency: str = "jpy", order_id: int = No
         amount=amount,
         currency=currency,
         payment_method_types=["card"],
-        metadata=metadata
+        metadata=metadata,
+        setup_future_usage=None  # これを明示的に追加でlink削除
     )
     return intent

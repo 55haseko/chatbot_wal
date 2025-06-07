@@ -5,7 +5,8 @@ const CheckoutForm = ({ answers, onSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false); // ⭐️ 処理中フラグ追加
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isCardComplete, setIsCardComplete] = useState(false); // ⭐️ 入力完了フラグ
 
   useEffect(() => {
     const createOrderAndIntent = async () => {
@@ -40,17 +41,16 @@ const CheckoutForm = ({ answers, onSuccess }) => {
     createOrderAndIntent();
   }, [answers]);
 
+  // ⭐️ カード入力監視
+  const handleCardChange = (event) => {
+    setIsCardComplete(event.complete);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isProcessing) {
-      // すでに送信中なら処理をしない
-      return;
-    }
-    setIsProcessing(true); // ⭐️ 送信開始時にtrueにする
-
-    console.log("🔍 answers:", answers);
-    console.log("🔍 postalCode:", answers.postalCode);
+    if (isProcessing) return;
+    setIsProcessing(true);
 
     const result = await stripe.confirmCardPayment(clientSecret, {
       payment_method: {
@@ -66,21 +66,38 @@ const CheckoutForm = ({ answers, onSuccess }) => {
 
     if (result.error) {
       alert("決済エラー：" + result.error.message);
-      setIsProcessing(false); // ⭐️ エラー時に再送信可能に
+      setIsProcessing(false);
     } else {
       const order_id = localStorage.getItem("order_id");
-      await fetch(`http://localhost:8000/order/complete/${order_id}`, {
-        method: "POST",
-      });
+      await fetch(`http://localhost:8000/order/complete/${order_id}`, { method: "POST" });
       alert("決済成功しました！");
       onSuccess();
-      // ⭐️ 正常終了後は再度送信を許可しなくてOK。フォームが消える想定？
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded bg-white">
+    <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4 p-4 border rounded bg-white">
+      {/* ダミーinput */}
+      <input
+        type="text"
+        name="fake-card-field"
+        style={{
+          position: "absolute",
+          top: "-9999px",
+          left: "-9999px",
+          height: "0px",
+          width: "0px",
+          opacity: "0",
+        }}
+        autoComplete="off"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+      
+      
+      
       <CardElement
+        onChange={handleCardChange} // カード入力監視
         options={{
           hidePostalCode: true,
           style: {
@@ -95,7 +112,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
       />
       <button
         type="submit"
-        disabled={!stripe || !clientSecret || isProcessing} // ⭐️ ここでisProcessingも考慮
+        disabled={!stripe || !clientSecret || !isCardComplete || isProcessing} // ⭐️ カードがcompleteにならないと押せない
         className={`bg-blue-600 text-white px-4 py-2 rounded w-full ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {isProcessing ? "処理中..." : "カードで支払う"}

@@ -1,9 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --chat-back-color: #ffffff; /* 修正したChatの背景 →白 */
+  --chat-bg-color: #e1dfdf; /* 修正した入力欄の枠 → 若干明るいグレー */
+  --chat-info-bubble-color: #cee573; /* 修正した吹き出しの背景 → 相手が話してる部分 */
+  --chat-input-bg: #ffffff; /* 修正した入力欄の背景 → 白 */
+  
+  --chat-button-from: #f39800; /* ボタン上側の色 → 濃いオレンジ */
+  --chat-button-to: #f39800;   /* ボタン下側の色 → 明るめオレンジ */
+  
+  --chat-text-color: #333333; /* 通常テキスト色 */
 }
+
+
 
 @theme inline {
   --color-background: var(--background);
