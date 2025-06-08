@@ -6,18 +6,20 @@ const CheckoutForm = ({ answers, onSuccess }) => {
   const elements = useElements();
   const [clientSecret, setClientSecret] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCardComplete, setIsCardComplete] = useState(false); // ⭐️ 入力完了フラグ
+  const [isCardComplete, setIsCardComplete] = useState(false);
+
+  const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
     const createOrderAndIntent = async () => {
-      const orderRes = await fetch("http://localhost:8000/order/initiate", {
+      const orderRes = await fetch(`${backendURL}/order/initiate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: answers.name?.lastName + " " + answers.name?.firstName,
+          name: `${answers.name?.lastName || ""} ${answers.name?.firstName || ""}`,
           email: answers.email,
           phone: answers.phone,
-          address: `${answers.address} ${answers.address2}`,
+          address: `${answers.address || ""} ${answers.address2 || ""}`,
           birthdate:
             answers.birthdate?.year && answers.birthdate?.month && answers.birthdate?.day
               ? `${answers.birthdate.year}-${String(answers.birthdate.month).padStart(2, "0")}-${String(answers.birthdate.day).padStart(2, "0")}`
@@ -28,7 +30,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
       });
       const { order_id } = await orderRes.json();
 
-      const intentRes = await fetch("http://localhost:8000/payments/create-payment-intent", {
+      const intentRes = await fetch(`${backendURL}/payments/create-payment-intent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: 5000, order_id }),
@@ -39,16 +41,14 @@ const CheckoutForm = ({ answers, onSuccess }) => {
       localStorage.setItem("order_id", order_id);
     };
     createOrderAndIntent();
-  }, [answers]);
+  }, [answers, backendURL]);
 
-  // ⭐️ カード入力監視
   const handleCardChange = (event) => {
     setIsCardComplete(event.complete);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (isProcessing) return;
     setIsProcessing(true);
 
@@ -69,7 +69,7 @@ const CheckoutForm = ({ answers, onSuccess }) => {
       setIsProcessing(false);
     } else {
       const order_id = localStorage.getItem("order_id");
-      await fetch(`http://localhost:8000/order/complete/${order_id}`, { method: "POST" });
+      await fetch(`${backendURL}/order/complete/${order_id}`, { method: "POST" });
       alert("決済成功しました！");
       onSuccess();
     }
@@ -77,7 +77,6 @@ const CheckoutForm = ({ answers, onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4 p-4 border rounded bg-white">
-      {/* ダミーinput */}
       <input
         type="text"
         name="fake-card-field"
@@ -93,11 +92,9 @@ const CheckoutForm = ({ answers, onSuccess }) => {
         tabIndex={-1}
         aria-hidden="true"
       />
-      
-      
-      
+
       <CardElement
-        onChange={handleCardChange} // カード入力監視
+        onChange={handleCardChange}
         options={{
           hidePostalCode: true,
           style: {
@@ -110,9 +107,10 @@ const CheckoutForm = ({ answers, onSuccess }) => {
           },
         }}
       />
+
       <button
         type="submit"
-        disabled={!stripe || !clientSecret || !isCardComplete || isProcessing} // ⭐️ カードがcompleteにならないと押せない
+        disabled={!stripe || !clientSecret || !isCardComplete || isProcessing}
         className={`bg-blue-600 text-white px-4 py-2 rounded w-full ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {isProcessing ? "処理中..." : "カードで支払う"}
