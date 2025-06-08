@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import * as wanakana from "wanakana";
-import kuromoji from "kuromoji";
 
 const ChatMessage = ({
   question,
@@ -24,19 +23,8 @@ const ChatMessage = ({
     }
   };
 
-  const [tokenizer, setTokenizer] = useState(null);
 
-  useEffect(() => {
-    kuromoji
-      .builder({ dicPath: "/node_modules/kuromoji/dict" })
-      .build((err, builtTokenizer) => {
-        if (err) {
-          console.error("kuromoji error:", err);
-          return;
-        }
-        setTokenizer(builtTokenizer);
-      });
-  }, []);
+
 
   const [furiganaEdited, setFuriganaEdited] = useState({
     lastName: false,
@@ -68,124 +56,97 @@ const ChatMessage = ({
             />
           )}
 
-          {type === "nameAndFuriganaSplit" && (
-            <div>
-              {/* 氏名 */}
-              <label
-                className="block mb-1 text-gray-800"
-                style={{ color: "var(--chat-text-color)" }}
-              >
-                お名前（氏名）
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="姓"
-                  className="w-1/2 border border-gray-300 p-2 rounded"
-                  style={{ backgroundColor: "var(--chat-input-bg)" }}
-                  value={value?.lastName || ""}
-                  onChange={(e) => {
-                    const newLastName = e.target.value;
-                    if (tokenizer) {
-                      const tokens = tokenizer.tokenize(newLastName);
-                      const reading = tokens
-                        .map((token) => token.reading || token.surface_form)
-                        .join("");
-                      const katakana = wanakana.toKatakana(reading);
-                      onChange?.({
-                        ...value,
-                        lastName: newLastName,
-                        furiganaLastName: furiganaEdited.lastName
-                          ? value?.furiganaLastName
-                          : katakana,
-                      });
-                    } else {
-                      onChange?.({
-                        ...value,
-                        lastName: newLastName,
-                        furiganaLastName: newLastName,
-                      });
-                    }
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="名"
-                  className="w-1/2 border border-gray-300 p-2 rounded"
-                  style={{ backgroundColor: "var(--chat-input-bg)" }}
-                  value={value?.firstName || ""}
-                  onChange={(e) => {
-                    const newFirstName = e.target.value;
-                    if (tokenizer) {
-                      const tokens = tokenizer.tokenize(newFirstName);
-                      const reading = tokens
-                        .map((token) => token.reading || token.surface_form)
-                        .join("");
-                      const katakana = wanakana.toKatakana(reading);
-                      onChange?.({
-                        ...value,
-                        firstName: newFirstName,
-                        furiganaFirstName: furiganaEdited.firstName
-                          ? value?.furiganaFirstName
-                          : katakana,
-                      });
-                    } else {
-                      onChange?.({
-                        ...value,
-                        firstName: newFirstName,
-                        furiganaFirstName: newFirstName,
-                      });
-                    }
-                  }}
-                />
-              </div>
+{type === "nameAndFuriganaSplit" && (
+  <div>
+    {/* 氏名 */}
+    <label className="block mb-1 text-gray-800" style={{ color: "var(--chat-text-color)" }}>
+      お名前（氏名）
+    </label>
+    <div className="flex space-x-2 mb-2">
+      <input
+        type="text"
+        placeholder="姓"
+        className="w-1/2 border border-gray-300 p-2 rounded"
+        style={{ backgroundColor: "var(--chat-input-bg)" }}
+        value={value?.lastName || ""}
+        onChange={(e) => {
+          const newLastName = e.target.value;
+          const isKanaOrRomaji = /^[a-zA-Zぁ-んー]*$/.test(newLastName);
+          const katakana = isKanaOrRomaji ? wanakana.toKatakana(newLastName) : value?.furiganaLastName || "";
 
-              {/* フリガナ */}
-              <label
-                className="block mb-1 text-gray-800"
-                style={{ color: "var(--chat-text-color)" }}
-              >
-                フリガナ
-              </label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="セイ"
-                  className="w-1/2 border border-gray-300 p-2 rounded"
-                  style={{ backgroundColor: "var(--chat-input-bg)" }}
-                  value={value?.furiganaLastName || ""}
-                  onChange={(e) => {
-                    onChange?.({
-                      ...value,
-                      furiganaLastName: e.target.value,
-                    });
-                    setFuriganaEdited((prev) => ({
-                      ...prev,
-                      lastName: true,
-                    }));
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="メイ"
-                  className="w-1/2 border border-gray-300 p-2 rounded"
-                  style={{ backgroundColor: "var(--chat-input-bg)" }}
-                  value={value?.furiganaFirstName || ""}
-                  onChange={(e) => {
-                    onChange?.({
-                      ...value,
-                      furiganaFirstName: e.target.value,
-                    });
-                    setFuriganaEdited((prev) => ({
-                      ...prev,
-                      firstName: true,
-                    }));
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          onChange?.({
+            ...value,
+            lastName: newLastName,
+            furiganaLastName: furiganaEdited.lastName
+              ? value?.furiganaLastName
+              : katakana,
+          });
+        }}
+      />
+      <input
+        type="text"
+        placeholder="名"
+        className="w-1/2 border border-gray-300 p-2 rounded"
+        style={{ backgroundColor: "var(--chat-input-bg)" }}
+        value={value?.firstName || ""}
+        onChange={(e) => {
+          const newFirstName = e.target.value;
+          const isKanaOrRomaji = /^[a-zA-Zぁ-んー]*$/.test(newFirstName);
+          const katakana = isKanaOrRomaji ? wanakana.toKatakana(newFirstName) : value?.furiganaFirstName || "";
 
+          onChange?.({
+            ...value,
+            firstName: newFirstName,
+            furiganaFirstName: furiganaEdited.firstName
+              ? value?.furiganaFirstName
+              : katakana,
+          });
+        }}
+      />
+    </div>
+
+    {/* フリガナ */}
+    <label className="block mb-1 text-gray-800" style={{ color: "var(--chat-text-color)" }}>
+      フリガナ
+    </label>
+    <div className="flex space-x-2 mb-2">
+      <input
+        type="text"
+        placeholder="セイ"
+        className="w-1/2 border border-gray-300 p-2 rounded"
+        style={{ backgroundColor: "var(--chat-input-bg)" }}
+        value={value?.furiganaLastName || ""}
+        onChange={(e) => {
+          onChange?.({
+            ...value,
+            furiganaLastName: e.target.value,
+          });
+          setFuriganaEdited((prev) => ({
+            ...prev,
+            lastName: true,
+          }));
+        }}
+      />
+      <input
+        type="text"
+        placeholder="メイ"
+        className="w-1/2 border border-gray-300 p-2 rounded"
+        style={{ backgroundColor: "var(--chat-input-bg)" }}
+        value={value?.furiganaFirstName || ""}
+        onChange={(e) => {
+          onChange?.({
+            ...value,
+            furiganaFirstName: e.target.value,
+          });
+          setFuriganaEdited((prev) => ({
+            ...prev,
+            firstName: true,
+          }));
+        }}
+      />
+    </div>
+  </div>
+)}
 
 
           {type === "birthdateSelect" && (
