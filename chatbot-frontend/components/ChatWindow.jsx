@@ -157,11 +157,7 @@ useEffect(() => {
       try {
         const res = await resolveAddress(answers.postalCode);
         const { prefecture, city } = res.data;
-        console.log("📦 APIから取得した住所：", {
-          postalCode: answers.postalCode,
-          prefecture,
-          city
-        });
+ 
 
         setAnswers(prev => ({
           ...prev,
@@ -346,7 +342,6 @@ useEffect(() => {
 
           ) : questions[currentStep].type === "addressDetail" ? (
           
-            // ─── ここが新しく追加する「住所入力用コンポーネント」描画部 ───
             <AddressDetail
               address={{
                 postalCode: answers.postalCode || "",
@@ -358,7 +353,10 @@ useEffect(() => {
                 setAnswers((prev) => ({ ...prev, [field]: value }))
               }
               onNext={handleNext}
+              editable={true}
+              showNextButton={true}
             />
+
 
           ) : questions[currentStep].type === "info" ? (
             <>
@@ -438,6 +436,22 @@ useEffect(() => {
 
 
             </div>
+              ) : q.type === "addressDetail" ? (
+              <AddressDetail
+                address={{
+                  postalCode: answers.postalCode || "",
+                  prefecture: answers.prefecture || "",
+                  city: answers.city || "",
+                  addressDetail: answers.addressDetail || "",
+                }}
+                onChange={(field, value) =>
+                  setAnswers(prev => ({ ...prev, [field]: value }))
+                }
+                onNext={() => {}}
+                editable={true}
+                showNextButton={false}
+              />
+
 
 
 
