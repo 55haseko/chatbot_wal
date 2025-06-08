@@ -157,6 +157,11 @@ useEffect(() => {
       try {
         const res = await resolveAddress(answers.postalCode);
         const { prefecture, city } = res.data;
+        console.log("📦 APIから取得した住所：", {
+          postalCode: answers.postalCode,
+          prefecture,
+          city
+        });
 
         setAnswers(prev => ({
           ...prev,

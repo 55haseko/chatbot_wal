@@ -11,6 +11,7 @@ def address(postal_code: str):
     """
     address = resolve_address(postal_code)
     if address:
-        return {"address": address}
+        # ✅ Reactが期待する形式（中身をそのまま返す）
+        return address
     else:
         return {"error": "Address not found"}
